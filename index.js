@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         MySelfRecorder
 // @namespace    https://github.com/2jo4u4/MySelfRecorder.git
-// @version      0.1
-// @description  try to take over the world!
-// @author       You
+// @version      1.0.0
+// @description  紀錄觀看的動畫集數
+// @author       Jay.Huang
 // @match        https://myself-bbs.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=myself-bbs.com
 // @grant        none
+// @license      MIT
 // ==/UserScript==
 
 const animePath = window.location.pathname; // like: /thread-47934-1-1.html
