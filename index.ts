@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MySelfRecorder
 // @namespace    https://github.com/2jo4u4/MySelfRecorder.git
-// @version      2.0.0
+// @version      2.0.1
 // @description  紀錄觀看的動畫集數
 // @author       Jay.Huang
 // @match        https://myself-bbs.com/*
@@ -21,6 +21,7 @@ const favoriteRemoveIconHref =
   "https://cdn-icons-png.flaticon.com/512/2001/2001316.png";
 const notFoundCoverImg =
   "https://cdn-icons-png.flaticon.com/512/7214/7214281.png";
+const clearLogImg = "https://cdn-icons-png.flaticon.com/512/3602/3602056.png";
 let favoritListFlag = false;
 interface RecordWatchProgress {
   [animecode: string]: number[];
@@ -105,11 +106,17 @@ function setClearLogBtn() {
     "vodlist_index"
   )[0] as HTMLDivElement;
   if (div) {
-    const clearBtn = document.createElement("button");
-    clearBtn.innerText = "清除此動畫紀錄";
+    const clearBtn = document.createElement("img");
+    clearBtn.src = clearLogImg;
     clearBtn.style.position = "absolute";
-    clearBtn.style.top = "0px";
-    clearBtn.style.right = "0px";
+    clearBtn.style.top = "6px";
+    clearBtn.style.right = "6px";
+    clearBtn.style.cursor = "pointer";
+    clearBtn.style.width = "24px";
+    clearBtn.style.height = "24px";
+    clearBtn.alt = "clear log";
+    clearBtn.title = "clear log";
+
     clearBtn.onclick = function () {
       const recorder = getRecorder();
       setRecorder({ ...recorder, [animeCode]: [] });
@@ -138,7 +145,6 @@ function myfavoriteList(showBtn: Boolean) {
   list.style.padding = "12px";
   list.style.backdropFilter = "blur(20px)";
   list.style.borderRadius = "12px";
-  list.style.overflow = "auto";
 
   const span = document.createElement("span");
   span.innerText = "暫無最愛";
@@ -146,12 +152,14 @@ function myfavoriteList(showBtn: Boolean) {
 
   const btn = document.createElement("img");
   btn.src = favoriteIconHref;
+  btn.title = "最愛列表";
   btn.style.width = "24px";
   btn.style.height = "24px";
   btn.style.padding = "12px";
   btn.style.borderRadius = "12px";
   btn.style.backdropFilter = "blur(20px)";
   btn.style.cursor = "pointer";
+  btn.style.border = "3px solid rgb(130, 130, 130)";
   btn.onclick = () => {
     favoritListFlag = !favoritListFlag;
     list.style.display = favoritListFlag ? "flex" : "none";
@@ -184,17 +192,21 @@ function myfavoriteList(showBtn: Boolean) {
     add_remove.style.borderRadius = "12px";
     add_remove.style.backdropFilter = "blur(20px)";
     add_remove.style.cursor = "pointer";
+    add_remove.style.border = "3px solid rgb(130, 130, 130)";
 
     const obj = favorite.find((item) => animeCode === item.animecode);
     let have = Boolean(obj);
     if (have) {
       add_remove.src = favoriteRemoveIconHref;
+      add_remove.title = "移除最愛";
     } else {
       add_remove.src = favoriteAddIconHref;
+      add_remove.title = "加入最愛";
     }
     add_remove.onclick = function () {
       if (have) {
         // remove
+        add_remove.title = "加入最愛";
         add_remove.src = favoriteAddIconHref;
         const newfavorite: FavoriteAnimeItem[] = [];
         for (let index = 0; index < favorite.length; index++) {
@@ -212,6 +224,7 @@ function myfavoriteList(showBtn: Boolean) {
         }
       } else {
         // add
+        add_remove.title = "移除最愛";
         add_remove.src = favoriteRemoveIconHref;
         const newfavorite = getFavorite();
         newfavorite.push(info);
@@ -241,22 +254,29 @@ function favoriteCard(v: FavoriteAnimeItem, marginTop = 0) {
   const card = document.createElement("div");
   card.id = animecode;
   card.style.marginTop = `${marginTop}px`;
+  card.style.maxWidth = "300px";
   const img = document.createElement("img");
   img.src = image;
+  img.style.position = "absolute";
+  img.style.top = "0";
+  img.style.left = "330px";
+  img.style.display = "none";
 
   const span = document.createElement("span");
-  span.style.marginTop = "4px";
   span.innerText = name;
-  span.style.color = "black";
-  span.style.position = "absolute";
-  span.style.bottom = "0";
-  span.style.backgroundColor = "#fafafa";
+  span.style.color = "#fff";
+  span.style.textShadow = "#000 0.1em 0.1em 0.2em";
   const link = document.createElement("a");
   link.href = href;
   link.style.display = "flex";
   link.style.flexDirection = "column";
   link.style.position = "relative";
-
+  link.onmouseenter = () => {
+    img.style.display = "block";
+  };
+  link.onmouseleave = () => {
+    img.style.display = "none";
+  };
   link.append(img, span);
   card.append(link);
   return card;
@@ -272,7 +292,7 @@ function getAnimeName() {
   const block = (document.querySelector("#pt .z")?.lastElementChild ||
     null) as HTMLAnchorElement | null;
   if (block) {
-    return block.innerText.replace(/【(\S|\s|0-9)*】(\s...)?/, "");
+    return block.innerText.replace(/【(\S|\s|0-9)*/, "");
   } else {
     return "unknown";
   }
