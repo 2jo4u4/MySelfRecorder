@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MySelfRecorder
 // @namespace    https://github.com/2jo4u4/MySelfRecorder.git
-// @version      2.0.1
+// @version      2.0.2
 // @description  紀錄觀看的動畫集數
 // @author       Jay.Huang
 // @match        https://myself-bbs.com/*
@@ -145,6 +145,10 @@ function myfavoriteList(showBtn: Boolean) {
   list.style.padding = "12px";
   list.style.backdropFilter = "blur(20px)";
   list.style.borderRadius = "12px";
+  list.style.overflow = "auto";
+  const imgPosition = document.createElement("div");
+  imgPosition.style.marginTop = "12px";
+  imgPosition.style.position = "relative";
 
   const span = document.createElement("span");
   span.innerText = "暫無最愛";
@@ -168,7 +172,7 @@ function myfavoriteList(showBtn: Boolean) {
 
   list.append(span);
   favorite.forEach((item, index) => {
-    const card = favoriteCard(item, index !== 0 ? 12 : 0);
+    const card = favoriteCard(imgPosition, item, index !== 0 ? 12 : 0);
     list.append(card);
   });
 
@@ -235,7 +239,7 @@ function myfavoriteList(showBtn: Boolean) {
         if (card) {
           card.style.display = "block";
         } else {
-          const card = favoriteCard(info, 12);
+          const card = favoriteCard(imgPosition, info, 12);
           list.append(card);
         }
       }
@@ -245,11 +249,15 @@ function myfavoriteList(showBtn: Boolean) {
     block.append(add_remove);
   }
 
-  block.append(btn, list);
+  block.append(btn, imgPosition, list);
   document.body.append(block);
 }
 
-function favoriteCard(v: FavoriteAnimeItem, marginTop = 0) {
+function favoriteCard(
+  imgPosition: HTMLDivElement,
+  v: FavoriteAnimeItem,
+  marginTop = 0
+) {
   const { animecode, image, name, href } = v;
   const card = document.createElement("div");
   card.id = animecode;
@@ -260,24 +268,20 @@ function favoriteCard(v: FavoriteAnimeItem, marginTop = 0) {
   img.style.position = "absolute";
   img.style.top = "0";
   img.style.left = "330px";
-  img.style.display = "none";
 
-  const span = document.createElement("span");
-  span.innerText = name;
-  span.style.color = "#fff";
-  span.style.textShadow = "#000 0.1em 0.1em 0.2em";
   const link = document.createElement("a");
   link.href = href;
+  link.style.color = "#fff";
+  link.style.textShadow = "#000 0.1em 0.1em 0.2em";
+  link.innerText = name;
   link.style.display = "flex";
   link.style.flexDirection = "column";
-  link.style.position = "relative";
   link.onmouseenter = () => {
-    img.style.display = "block";
+    imgPosition.append(img);
   };
   link.onmouseleave = () => {
-    img.style.display = "none";
+    img.remove();
   };
-  link.append(img, span);
   card.append(link);
   return card;
 }
